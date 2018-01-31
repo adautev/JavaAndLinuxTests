@@ -6,8 +6,12 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class App 
+public class Pipes
 {
+    //Buffer size determined here: http://tldp.org/LDP/lpg/node13.html
+    static final short bufferSize = 4096;
+    public static final byte terminationByte = (byte)'\n';
+
     public static void main( String[] args ) throws IOException {
         PipedInputStream inputStream = new PipedInputStream();
         PipedOutputStream outputStream = new PipedOutputStream();
@@ -43,6 +47,7 @@ public class App
         }
     }
     private static void produceData(PipedOutputStream outputStream) throws IOException {
+
         produceString("Producer: Getting lorem ipsum...", outputStream);
         String loremIpsum = getLoremIpsum();
         JSONArray loremIpsumSentences = new JSONArray(loremIpsum);
@@ -57,7 +62,8 @@ public class App
         byte character;
         while (true) {
             StringBuilder sentence = new StringBuilder();
-            while ((character = (byte) inputStream.read()) != (byte)'\n') {
+            while ((character = (byte) inputStream.read()) != terminationByte) {
+                //Handling reading empty stuff;
                 if(character == -1) {
                     Thread.sleep(1000);
                     continue;
@@ -76,10 +82,23 @@ public class App
     }
     private static void produceString(String inputString, PipedOutputStream outputStream) {
         try {
+            int currentBufferLength = inputString.length() > bufferSize ? bufferSize : inputString.length();
+            byte[] bufferToSend = new byte[currentBufferLength];
+            short byteCounter = 0;
             for (char character:inputString.toCharArray()) {
-                outputStream.write((byte)character);
+                if(byteCounter < currentBufferLength) {
+                    bufferToSend[byteCounter] = (byte)character;
+                    byteCounter++;
+                }
+                if(byteCounter == currentBufferLength){
+                    outputStream.write(bufferToSend);
+                }
             }
-            outputStream.write((byte)'\n');
+            //Post leftovers
+            if(bufferToSend[0] != 0 && currentBufferLength == bufferSize) {
+                outputStream.write(bufferToSend);
+            }
+            outputStream.write(terminationByte);
         } catch (Exception e) {
             e.printStackTrace();
         }
