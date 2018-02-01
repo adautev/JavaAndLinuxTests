@@ -17,7 +17,8 @@ JNIEXPORT void JNICALL Java_com_saorsa_javaandlinux_jni_CreateNamedPipeJNI_creat
 (JNIEnv* env, jobject object, jstring javaString) {
     const char *nativeString = (*env)->GetStringUTFChars(env, javaString, JNI_FALSE);
     umask(0);
-    mknod(nativeString, S_IFIFO|0666, 0);
+    mknod(nativeString, S_IFIFO|0755, 0);
     (*env)->ReleaseStringUTFChars(env, javaString, nativeString);
+    return;
 }
 
