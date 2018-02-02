@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class NamedPipesChatServer {
-    //echo "angel:#:andrey:#:send:#:Gazorpazorp" > /tmp/server
+    //echo "angel:#:andrey:#:send:#:Gazorpazorp" > /tmp/serverFIFO &
     public static final String SERVER_PIPE = "/tmp/serverFIFO";
     public static final String CLIENT_PIPE_PATH = "/tmp/";
     public static final String COMMAND_DELIMITER = ":#:";
